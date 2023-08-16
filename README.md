@@ -86,6 +86,9 @@ For questions, feedback, or collaboration inquiries related to this project, fee
 
 **MOHAMMAD SHOEB FAIZAN**
 - Email: shoebfaizan71@gmail.com
+- LinkedIn: [Mohammad-Shoeb-Faizan](https://www.linkedin.com/in/mohammad-shoeb-faizan-5787a0271/)
+- Portfolio: [ShoebTechArena.io](https://shoeb-tech-arena.netlify.app/)
+
 
 ---
 
