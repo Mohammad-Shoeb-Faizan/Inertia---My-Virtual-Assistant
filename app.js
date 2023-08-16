@@ -10,6 +10,11 @@ function speak(sentence) {
   window.speechSynthesis.speak(speech);
 }
 
+// Function to keep speech running
+function keepSpeechRunning() {
+  recognition.start();
+}
+
 // Function to greet based on the time of day
 function greetBasedOnTime() {
   const currentHour = new Date().getHours();
@@ -30,6 +35,7 @@ window.addEventListener("load", () => {
   speak("Activating Inertia");
   speak("Going online");
   greetBasedOnTime();
+  keepSpeechRunning(); // Start speech recognition after activation
 });
 
 // Setting up SpeechRecognition
@@ -256,6 +262,9 @@ function processUserCommand(message) {
   } else if (message.includes("open google")) {
     window.open("https://google.com", "_blank");
     responseText = "Opening Google";
+  } else if (transcript.includes("open youtube")) {
+    readOut("Opening Youtube Sir");
+    window.open("https://www.youtube.com/", "_blank");
   } else if (message.includes("open instagram")) {
     window.open("https://instagram.com", "_blank");
     responseText = "Opening Instagram";
@@ -337,6 +346,46 @@ function processUserCommand(message) {
   } else if (message.includes("find nearby")) {
     const type = message.replace("find nearby", "").trim();
     findNearbyPlaces(type);
+  } else if (
+    transcript.includes("open firebase") ||
+    transcript.includes("open fire base")
+  ) {
+    readOut("Opening Firebase Console");
+    window.open("https://console.firebase.google.com/", "_blank");
+  } else if (transcript.includes("search for")) {
+    const searchTerm = transcript.replace("search for", "").trim();
+    if (searchTerm) {
+      readOut(`Searching for ${searchTerm}`);
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(
+        searchTerm
+      )}`;
+      window.open(searchUrl);
+    } else {
+      readOut("Please specify something to search for.");
+    }
+  } else if (transcript.includes("play")) {
+    const searchTerm = transcript.replace("play", "").trim();
+    if (searchTerm) {
+      readOut(`playing ${searchTerm}`);
+      const searchUrl = `https://www.youtube.com/search?q=${encodeURIComponent(
+        searchTerm
+      )}`;
+      window.open(searchUrl);
+    } else if (transcript.includes("open github")) {
+      readOut("opening github");
+      window.open("https://github.com/");
+    } else if (transcript.includes("open my github profile")) {
+      readOut("opening your github profile");
+      window.open(`https://github.com/${JSON.parse(userdata).github}`);
+    } else {
+      readOut("Please specify something to search for.");
+    }
+  } else if (
+    transcript.includes("shut down inertia") ||
+    transcript.includes("shutdown inertia")
+  ) {
+    readOut("Okay, I'll take a nap sir");
+    recognition.stop();
   }
 
   speak(responseText);
