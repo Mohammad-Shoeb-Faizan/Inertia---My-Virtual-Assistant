@@ -373,15 +373,10 @@ function processUserCommand(message) {
         searchTerm
       )}`;
       window.open(searchUrl);
-    } else if (message.includes("open github")) {
-      responseText = "opening github";
-      window.open("https://github.com/");
-    } else if (message.includes("open my github profile")) {
-      responseText = "opening your github profile";
-      window.open(`https://github.com/${JSON.parse(userdata).github}`);
-    } else {
-      responseText = "Please specify something to search for.";
     }
+  } else if (message.includes("open github")) {
+    responseText = "Opening GitHub";
+    window.open("https://github.com/", "_blank");
   } else if (
     message.includes("shut down inertia") ||
     message.includes("shutdown inertia")
