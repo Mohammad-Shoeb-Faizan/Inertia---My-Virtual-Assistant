@@ -2,17 +2,44 @@
 const btn = document.querySelector(".talk");
 const content = document.querySelector(".content");
 
+// Initialization
+window.addEventListener("load", () => {
+  initializeAssistant();
+});
+
+// Initialize the assistant
+function initializeAssistant() {
+  speak("Activating Inertia");
+  speak("Going online");
+  greetBasedOnTime();
+  startSpeechRecognition();
+}
+
 // Function to speak a sentence
 function speak(sentence) {
   const speech = new SpeechSynthesisUtterance(sentence);
-  speech.rate = 1;
+  speech.volume = 1;
   speech.pitch = 1;
+  speech.rate = 1;
   window.speechSynthesis.speak(speech);
 }
 
-// Function to keep speech running
-function keepSpeechRunning() {
-  recognition.start();
+// Function to start speech recognition
+function startSpeechRecognition() {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  // recognition.continuous = true;
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    content.textContent = transcript;
+    processUserCommand(transcript.toLowerCase());
+  };
+
+  btn.addEventListener("click", () => {
+    recognition.start();
+  });
 }
 
 // Function to greet based on the time of day
@@ -29,31 +56,6 @@ function greetBasedOnTime() {
     speak("Good Evening Boss");
   }
 }
-
-// Initialization
-window.addEventListener("load", () => {
-  speak("Activating Inertia");
-  speak("Going online");
-  greetBasedOnTime();
-  keepSpeechRunning(); // Start speech recognition after activation
-});
-
-// Setting up SpeechRecognition
-const SpeechRecognition =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
-const recognition = new SpeechRecognition();
-
-// Handling speech recognition results
-recognition.onresult = (event) => {
-  const transcript = event.results[0][0].transcript;
-  content.textContent = transcript;
-  processUserCommand(transcript.toLowerCase());
-};
-
-// Start speech recognition on button click
-btn.addEventListener("click", () => {
-  recognition.start();
-});
 
 // Function to fetch and speak weather information
 function fetchWeather(city) {
@@ -262,8 +264,8 @@ function processUserCommand(message) {
   } else if (message.includes("open google")) {
     window.open("https://google.com", "_blank");
     responseText = "Opening Google";
-  } else if (transcript.includes("open youtube")) {
-    readOut("Opening Youtube Sir");
+  } else if (message.includes("open youtube")) {
+    responseText = "Opening Youtube Sir";
     window.open("https://www.youtube.com/", "_blank");
   } else if (message.includes("open instagram")) {
     window.open("https://instagram.com", "_blank");
@@ -347,44 +349,44 @@ function processUserCommand(message) {
     const type = message.replace("find nearby", "").trim();
     findNearbyPlaces(type);
   } else if (
-    transcript.includes("open firebase") ||
-    transcript.includes("open fire base")
+    message.includes("open firebase") ||
+    message.includes("open fire base")
   ) {
-    readOut("Opening Firebase Console");
+    responseText = "Opening Firebase Console";
     window.open("https://console.firebase.google.com/", "_blank");
-  } else if (transcript.includes("search for")) {
-    const searchTerm = transcript.replace("search for", "").trim();
+  } else if (message.includes("search for")) {
+    const searchTerm = message.replace("search for", "").trim();
     if (searchTerm) {
-      readOut(`Searching for ${searchTerm}`);
+      responseText = `Searching for ${searchTerm}`;
       const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(
         searchTerm
       )}`;
       window.open(searchUrl);
     } else {
-      readOut("Please specify something to search for.");
+      responseText = "Please specify something to search for.";
     }
-  } else if (transcript.includes("play")) {
-    const searchTerm = transcript.replace("play", "").trim();
+  } else if (message.includes("play")) {
+    const searchTerm = message.replace("play", "").trim();
     if (searchTerm) {
-      readOut(`playing ${searchTerm}`);
+      responseText = `playing ${searchTerm}`;
       const searchUrl = `https://www.youtube.com/search?q=${encodeURIComponent(
         searchTerm
       )}`;
       window.open(searchUrl);
-    } else if (transcript.includes("open github")) {
-      readOut("opening github");
+    } else if (message.includes("open github")) {
+      responseText = "opening github";
       window.open("https://github.com/");
-    } else if (transcript.includes("open my github profile")) {
-      readOut("opening your github profile");
+    } else if (message.includes("open my github profile")) {
+      responseText = "opening your github profile";
       window.open(`https://github.com/${JSON.parse(userdata).github}`);
     } else {
-      readOut("Please specify something to search for.");
+      responseText = "Please specify something to search for.";
     }
   } else if (
-    transcript.includes("shut down inertia") ||
-    transcript.includes("shutdown inertia")
+    message.includes("shut down inertia") ||
+    message.includes("shutdown inertia")
   ) {
-    readOut("Okay, I'll take a nap sir");
+    responseText = "Okay, I'll take a nap sir";
     recognition.stop();
   }
 
