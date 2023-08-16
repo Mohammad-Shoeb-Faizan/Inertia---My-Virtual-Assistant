@@ -65,7 +65,9 @@ function fetchWeather(city) {
         const weatherText = `The weather in ${city} is ${description}. The temperature is ${temperature}°C and the humidity is ${humidity}%.`;
         speak(weatherText);
       } else {
-        speak(`Sorry, I couldn't retrieve the weather information for ${city}.`);
+        speak(
+          `Sorry, I couldn't retrieve the weather information for ${city}.`
+        );
       }
     })
     .catch(() => {
@@ -86,52 +88,160 @@ function setReminder(task, time) {
     reminders[task] = reminderTime;
     speak(`Reminder set for ${task} at ${time}`);
   } else {
-    speak("Sorry, the specified time is in the past. Please provide a valid time.");
+    speak(
+      "Sorry, the specified time is in the past. Please provide a valid time."
+    );
   }
 }
 
 // Function to list upcoming reminders
 function listUpcomingReminders() {
-    const now = new Date();
-    const upcomingReminders = [];
-  
-    for (const task in reminders) {
-      if (reminders[task] > now) {
-        upcomingReminders.push(`${task} at ${reminders[task].toLocaleTimeString()}`);
+  const now = new Date();
+  const upcomingReminders = [];
+
+  for (const task in reminders) {
+    if (reminders[task] > now) {
+      upcomingReminders.push(
+        `${task} at ${reminders[task].toLocaleTimeString()}`
+      );
+    }
+  }
+
+  if (upcomingReminders.length > 0) {
+    speak("Here are your upcoming reminders:");
+    upcomingReminders.forEach((reminder) => speak(reminder));
+  } else {
+    speak("You don't have any upcoming reminders.");
+  }
+}
+
+// Function to define words using a dictionary API
+function defineWord(word) {
+  const apiKey = "9dba1189-dff2-437f-86f0-c510781629d3";
+  const apiUrl = `https://api.dictionary.com/api/v3/references/learners/json/${word}?key=${apiKey}`;
+
+  fetch(apiUrl)
+    .then((response) => response.json())
+    .then((data) => {
+      if (Array.isArray(data) && data.length > 0) {
+        const firstDefinition = data[0].shortdef[0];
+        speak(`The definition of "${word}" is: ${firstDefinition}`);
+      } else {
+        speak(`Sorry, I couldn't find a definition for "${word}".`);
       }
-    }
-  
-    if (upcomingReminders.length > 0) {
-      speak("Here are your upcoming reminders:");
-      upcomingReminders.forEach(reminder => speak(reminder));
+    })
+    .catch(() => {
+      speak("Sorry, there was an error while fetching the definition.");
+    });
+}
+
+// Function to fetch a random joke from JokeAPI
+async function getRandomJokeFromAPI() {
+  const apiUrl = "https://v2.jokeapi.dev/joke/Any";
+
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    if (data.type === "single") {
+      return data.joke;
+    } else if (data.type === "twopart") {
+      return `${data.setup} ${data.delivery}`;
     } else {
-      speak("You don't have any upcoming reminders.");
+      return "I couldn't find a joke at the moment.";
     }
+  } catch (error) {
+    return "Sorry, there was an error fetching a joke.";
   }
+}
 
-  // Function to define words using a dictionary API
-  function defineWord(word) {
-    const apiKey = "9dba1189-dff2-437f-86f0-c510781629d3";
-    const apiUrl = `https://api.dictionary.com/api/v3/references/learners/json/${word}?key=${apiKey}`;
-  
-    fetch(apiUrl)
-      .then((response) => response.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          const firstDefinition = data[0].shortdef[0];
-          speak(`The definition of "${word}" is: ${firstDefinition}`);
-        } else {
-          speak(`Sorry, I couldn't find a definition for "${word}".`);
-        }
-      })
-      .catch(() => {
-        speak("Sorry, there was an error while fetching the definition.");
+// Function to perform complex math calculations using math.js
+function performComplexCalculation(expression) {
+  try {
+    const result = math.evaluate(expression);
+    return result;
+  } catch (error) {
+    return "Sorry, I couldn't perform the calculation.";
+  }
+}
+
+// Function to fetch news updates using NewsAPI
+function fetchNews(topic) {
+  const apiKey = "8a4ad43954c548a9a9d8692d6e9edd9b";
+  const apiUrl = `https://newsapi.org/v2/everything?q=${topic}&apiKey=${apiKey}`;
+
+  $.ajax({
+    url: apiUrl,
+    method: "GET",
+    success: function (data) {
+      if (data.articles && data.articles.length > 0) {
+        const topNews = data.articles.slice(0, 5); // Limit to top 5 news
+        topNews.forEach((news, index) => {
+          const newsText = `${index + 1}. ${news.title}`;
+          speak(newsText);
+        });
+      } else {
+        speak("Sorry, I couldn't find any news updates.");
+      }
+    },
+    error: function () {
+      speak("Sorry, there was an error fetching news updates.");
+    },
+  });
+}
+
+// Function to set an alarm
+function setAlarm(alarmTime) {
+  const currentTime = new Date();
+  const [hours, minutes] = alarmTime.split(":");
+  const alarmDateTime = new Date(
+    currentTime.getFullYear(),
+    currentTime.getMonth(),
+    currentTime.getDate(),
+    hours,
+    minutes
+  );
+
+  const timeUntilAlarm = alarmDateTime - currentTime;
+  if (timeUntilAlarm > 0) {
+    setTimeout(() => {
+      speak(`Alarm for ${alarmTime} is ringing!`);
+    }, timeUntilAlarm);
+    speak(`Alarm set for ${alarmTime}`);
+  } else {
+    speak("Please provide a future time for the alarm.");
+  }
+}
+
+function findNearbyPlaces(type) {
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+
+      const nominatim = new NominatimJS();
+      const response = await nominatim.reverse({
+        lat: latitude,
+        lon: longitude,
+        format: "json",
       });
+
+      if (response && response.length > 0) {
+        const address = response[0].address;
+        if (address[type]) {
+          const nearbyType = address[type];
+          speak(`Here are some nearby ${type}: ${nearbyType}`);
+        } else {
+          speak(`No nearby ${type} found.`);
+        }
+      } else {
+        speak(`Sorry, couldn't find any nearby locations.`);
+      }
+    });
+  } else {
+    speak("Geolocation is not available in your browser.");
   }
-  
-
-
-
+}
 
 // Function to process user commands
 function processUserCommand(message) {
@@ -178,7 +288,7 @@ function processUserCommand(message) {
     } else {
       responseText = "Please provide a city name for weather information.";
     }
-  }  else if (message.includes("set a reminder for")) {
+  } else if (message.includes("set a reminder for")) {
     const regex = /set a reminder for (.*) at (.*)/i;
     const matches = message.match(regex);
 
@@ -187,7 +297,8 @@ function processUserCommand(message) {
       const time = matches[2];
       setReminder(task, time);
     } else {
-      responseText = "Please provide a valid reminder format: 'Set a reminder for [task] at [time]'";
+      responseText =
+        "Please provide a valid reminder format: 'Set a reminder for [task] at [time]'";
     }
   } else if (message.includes("list upcoming reminders")) {
     listUpcomingReminders();
@@ -199,8 +310,33 @@ function processUserCommand(message) {
       const word = matches[1];
       defineWord(word);
     } else {
-      responseText = "Please provide a valid query format: 'What does [word] mean?'";
+      responseText =
+        "Please provide a valid query format: 'What does [word] mean?'";
     }
+  } else if (message.includes("tell me a joke")) {
+    const randomJoke = getRandomJokeFromAPI();
+    speak(randomJoke);
+  } else if (message.includes("calculate")) {
+    const expression = message.replace("calculate", "").trim();
+    const result = performComplexCalculation(expression);
+    speak(`The result of ${expression} is ${result}`);
+  } else if (message.includes("news about")) {
+    const topic = message.replace("news about", "").trim();
+    fetchNews(topic);
+  } else if (message.includes("set an alarm for")) {
+    const regex = /set an alarm for (.*)/i;
+    const matches = message.match(regex);
+
+    if (matches && matches.length >= 2) {
+      const alarmTime = matches[1];
+      setAlarm(alarmTime);
+    } else {
+      responseText =
+        "Please provide a valid alarm format: 'Set an alarm for [time]'";
+    }
+  } else if (message.includes("find nearby")) {
+    const type = message.replace("find nearby", "").trim();
+    findNearbyPlaces(type);
   }
 
   speak(responseText);
