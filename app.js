@@ -108,6 +108,26 @@ function listUpcomingReminders() {
       speak("You don't have any upcoming reminders.");
     }
   }
+
+  // Function to define words using a dictionary API
+  function defineWord(word) {
+    const apiKey = "9dba1189-dff2-437f-86f0-c510781629d3";
+    const apiUrl = `https://api.dictionary.com/api/v3/references/learners/json/${word}?key=${apiKey}`;
+  
+    fetch(apiUrl)
+      .then((response) => response.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const firstDefinition = data[0].shortdef[0];
+          speak(`The definition of "${word}" is: ${firstDefinition}`);
+        } else {
+          speak(`Sorry, I couldn't find a definition for "${word}".`);
+        }
+      })
+      .catch(() => {
+        speak("Sorry, there was an error while fetching the definition.");
+      });
+  }
   
 
 
@@ -171,6 +191,16 @@ function processUserCommand(message) {
     }
   } else if (message.includes("list upcoming reminders")) {
     listUpcomingReminders();
+  } else if (message.includes("what does")) {
+    const regex = /what does (.*) mean/i;
+    const matches = message.match(regex);
+
+    if (matches && matches.length >= 2) {
+      const word = matches[1];
+      defineWord(word);
+    } else {
+      responseText = "Please provide a valid query format: 'What does [word] mean?'";
+    }
   }
 
   speak(responseText);
